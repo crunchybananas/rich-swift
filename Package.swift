@@ -8,12 +8,22 @@ let package = Package(
     ],
     products: [
         .library(name: "RichSwift", targets: ["RichSwift"]),
+        .library(name: "RichSwiftLog", targets: ["RichSwiftLog"]),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.5.0"),
+    ],
     targets: [
         .target(
             name: "RichSwift",
             dependencies: []
+        ),
+        .target(
+            name: "RichSwiftLog",
+            dependencies: [
+                "RichSwift",
+                .product(name: "Logging", package: "swift-log"),
+            ]
         ),
         .testTarget(
             name: "RichSwiftTests",

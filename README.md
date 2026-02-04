@@ -5,10 +5,18 @@ A Swift port of Python's [Rich](https://github.com/Textualize/rich) library for 
 ## Features
 
 - 🎨 **Styled text** - Bold, italic, underline, colors, and more
-- 📊 **Tables** - Beautiful ASCII/Unicode tables
-- 📈 **Progress bars** - Animated progress indicators
-- 🖨️ **Console** - Smart terminal output with automatic width detection
-- ✨ **Markup** - Simple markup syntax like `[bold red]Hello[/]`
+- 📊 **Tables** - Beautiful ASCII/Unicode tables with multiple box styles
+- 📈 **Progress bars** - Static and animated with async/await
+- 🌳 **Tree views** - File trees, hierarchies with custom styles
+- 🖼️ **Panels** - Bordered content boxes with titles
+- 💻 **Syntax highlighting** - Code blocks with themes (Monokai, GitHub, Dracula)
+- 📝 **Markdown** - Render markdown to styled terminal output
+- 🎯 **Live updates** - Spinners, status indicators, multi-progress tracking
+- 📋 **Prompts** - Interactive input, confirmation, select menus
+- 🔗 **Hyperlinks** - Clickable links in supported terminals (OSC 8)
+- 😀 **Emoji** - Shortcode support (`:rocket:` → 🚀)
+- 📊 **JSON** - Pretty printed with syntax highlighting
+- 📜 **Logging** - Swift-log integration with colored output
 
 ## Installation
 
@@ -16,7 +24,7 @@ Add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/yourusername/rich-swift.git", from: "0.1.0")
+    .package(url: "https://github.com/yourusername/rich-swift.git", from: "0.3.0")
 ]
 ```
 
@@ -30,12 +38,15 @@ let console = Console()
 // Simple styled output
 console.print("Hello, [bold green]World[/]!")
 
+// Emoji support
+console.print(":rocket: Launching! :star:".emojified)
+
 // Tables
 let table = Table(title: "Star Wars Movies")
-table.addColumn("Released")
-table.addColumn("Title")
-table.addRow("1977", "A New Hope")
-table.addRow("1980", "The Empire Strikes Back")
+    .addColumn("Released")
+    .addColumn("Title")
+    .addRow("1977", "A New Hope")
+    .addRow("1980", "The Empire Strikes Back")
 console.print(table)
 
 // Tree views
@@ -43,6 +54,20 @@ let tree = Tree("📁 Project")
 tree.add("📄 README.md")
 tree.add("📁 Sources").add("📄 main.swift")
 console.print(tree)
+
+// Syntax highlighting
+let code = """
+func greet(name: String) {
+    print("Hello, \\(name)!")
+}
+"""
+console.print(Syntax(code, language: .swift, lineNumbers: true))
+
+// Markdown
+console.printMarkdown("# Hello\n\nThis is **bold** and *italic*.")
+
+// JSON pretty printing
+console.printJSON(["name": "RichSwift", "version": "0.3.0"])
 
 // Progress with async/await
 try await console.status("Loading...") {
@@ -57,6 +82,26 @@ try await console.progress { progress in
         try await Task.sleep(for: .milliseconds(50))
     }
 }
+
+// Interactive prompts
+let name = console.prompt("What is your name?")
+let confirmed = console.confirm("Continue?")
+let choice = console.select("Pick one:", choices: ["Option A", "Option B", "Option C"])
+```
+
+### Swift-Log Integration
+
+```swift
+import Logging
+import RichSwiftLog
+
+LoggingSystem.bootstrap { label in
+    RichLogHandler(label: label, console: Console.shared)
+}
+
+let logger = Logger(label: "com.example.app")
+logger.info("Application started")
+logger.error("Something went wrong!")
 ```
 
 ## Platforms
@@ -84,26 +129,26 @@ try await console.progress { progress in
 - [x] Status indicators
 - [x] Multi-progress (multiple concurrent bars)
 
-### v0.3.0 - Rich Content (Current)
+### v0.3.0 - Rich Content ✅
 - [x] Tree view (file trees, hierarchies)
 - [x] Columns/grid layout
 - [x] Padding and alignment utilities
-- [ ] Syntax highlighting for code blocks
-- [ ] Markdown rendering
+- [x] Syntax highlighting for code blocks
+- [x] Markdown rendering
 
-### v0.4.0 - Developer Experience
-- [ ] Swift-log integration (`LogHandler`)
-- [ ] Prompt/input utilities
-- [ ] Confirmation dialogs
-- [ ] Select menus (arrow key navigation)
-- [ ] Pretty exception/error display
+### v0.4.0 - Developer Experience ✅
+- [x] Swift-log integration (`LogHandler`)
+- [x] Prompt/input utilities
+- [x] Confirmation dialogs
+- [x] Select menus (arrow key navigation)
+- [x] Pretty exception/error display
 
-### v0.5.0 - Advanced Features
-- [ ] Emoji support with fallbacks
-- [ ] Box drawing with custom styles
-- [ ] JSON/YAML pretty printing
+### v0.5.0 - Advanced Features ✅
+- [x] Emoji support with shortcodes
+- [x] JSON pretty printing
+- [x] Hyperlinks (OSC 8 terminals)
 - [ ] Diff display (side-by-side, unified)
-- [ ] Hyperlinks (OSC 8 terminals)
+- [ ] YAML pretty printing
 
 ### v1.0.0 - Production Ready
 - [ ] Windows Terminal support
@@ -115,43 +160,70 @@ try await console.progress { progress in
 ## Running the Demos
 
 ```bash
-# Static demo (tables, panels, trees, etc.)
+# Static demo (tables, panels, trees, syntax, etc.)
 swift run Demo
 
 # Live/animated demo (spinners, progress bars)
 swift run LiveDemo
 ```
 
-## Next Steps
+## API Reference
 
-If you're picking this up, here's the suggested order of development:
-
-### 1. Syntax Highlighting
-Would make this invaluable for CLI dev tools:
+### Console
 
 ```swift
-console.print(Code(source, language: .swift))
+let console = Console()
+
+// Output
+console.print("Text")                    // Print styled text
+console.print(table)                     // Print any Renderable
+console.printMarkdown(string)            // Render markdown
+console.printJSON(object)                // Pretty print JSON
+console.rule("Title")                    // Horizontal rule
+console.line()                           // Blank line
+
+// Input
+console.prompt("Name?")                  // Text input
+console.promptInt("Age?")                // Integer input
+console.password("Password:")            // Hidden input
+console.confirm("Continue?")             // Yes/no
+console.select("Choice:", choices: [...])// Single select
+console.multiSelect("Pick:", choices: [...]) // Multi select
 ```
 
-Consider using tree-sitter bindings or a simple regex-based highlighter.
-
-### 2. Swift-Log Integration
-Easy win for adoption:
+### Renderables
 
 ```swift
-import Logging
-LoggingSystem.bootstrap { label in
-    RichLogHandler(label: label, console: .shared)
-}
+// Table
+Table(title: "Title", boxStyle: .rounded)
+    .addColumn("Header")
+    .addRow("Cell")
+
+// Panel
+Panel("Content", title: "Title", subtitle: "Subtitle")
+
+// Tree
+let tree = Tree("Root")
+tree.add("Child").add("Grandchild")
+
+// Syntax
+Syntax(code, language: .swift, theme: .monokai, lineNumbers: true)
+
+// Progress
+ProgressBar(completed: 50, total: 100, width: 40)
 ```
 
-### 3. Input/Prompts
-Interactive CLI apps need this:
+### Styles
 
 ```swift
-let name = console.prompt("What is your name?")
-let confirmed = console.confirm("Continue?")
-let choice = console.select("Pick one:", choices: ["A", "B", "C"])
+// Text with styles
+var text = Text()
+text.append("Bold", style: .bold)
+text.append("Red", style: Style(foreground: .red))
+text.appendLink("Click", url: "https://example.com")
+
+// Colors
+Color.red, .green, .blue, .rgb(255, 128, 0), .hex("#ff8000")
 ```
 
 ## Contributing

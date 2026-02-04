@@ -12,11 +12,17 @@ console.print("[bold red]Error:[/] Something went wrong (just kidding)")
 console.print("[italic cyan]Tip:[/] You can combine [bold underline]multiple styles[/]")
 console.line()
 
+// Emoji support
+console.rule("Emoji Support :rocket:")
+console.print(":check: Emoji codes work! :tada: :star: :heart:".emojified)
+console.print(":thumbsup: Use :emoji_name: syntax for shortcuts".emojified)
+console.line()
+
 // Panel
 console.print(Panel(
-    "RichSwift brings beautiful terminal output to Swift!\n\nFeatures:\n• Styled text\n• Tables\n• Panels\n• Progress bars\n• Trees\n• Live updates",
+    "RichSwift brings beautiful terminal output to Swift!\n\nFeatures:\n• Styled text\n• Tables\n• Panels\n• Progress bars\n• Trees\n• Syntax highlighting\n• Live updates",
     title: "Welcome",
-    subtitle: "v0.2.0"
+    subtitle: "v0.3.0"
 ))
 console.line()
 
@@ -34,24 +40,6 @@ let table = Table(title: "Star Wars Movies")
 console.print(table)
 console.line()
 
-// Different table styles
-console.rule("Box Styles")
-
-let styles: [(String, Table.BoxStyle)] = [
-    ("Rounded", .rounded),
-    ("Square", .square),
-    ("Heavy", .heavy),
-    ("ASCII", .ascii),
-]
-
-for (name, boxStyle) in styles {
-    let miniTable = Table(boxStyle: boxStyle)
-        .addColumn(name)
-        .addRow("Example")
-    console.print(miniTable)
-}
-console.line()
-
 // Tree view
 console.rule("Tree View")
 let tree = Tree("📁 RichSwift", style: Style.bold)
@@ -63,14 +51,55 @@ consoleDir.add("📄 Console.swift", style: Style(foreground: .green))
 consoleDir.add("📄 Terminal.swift", style: Style(foreground: .green))
 let renderables = richswift.add("📁 Renderables")
 renderables.add("📄 Table.swift", style: Style(foreground: .green))
-renderables.add("📄 Panel.swift", style: Style(foreground: .green))
-renderables.add("📄 Tree.swift", style: Style(foreground: .green))
-let tests = tree.add("📁 Tests", style: Style(foreground: .yellow))
-tests.add("📄 RichSwiftTests.swift", style: Style(foreground: .green))
+renderables.add("📄 Syntax.swift", style: Style(foreground: .green))
+renderables.add("📄 Markdown.swift", style: Style(foreground: .green))
 tree.add("📄 Package.swift", style: Style(foreground: .cyan))
-tree.add("📄 README.md", style: Style(foreground: .cyan))
 
 console.print(tree)
+console.line()
+
+// Syntax highlighting
+console.rule("Syntax Highlighting")
+let swiftCode = """
+import Foundation
+
+struct User: Codable {
+    let name: String
+    let age: Int
+    
+    func greet() -> String {
+        return "Hello, \\(name)!"
+    }
+}
+"""
+console.print(Syntax(swiftCode, language: .swift, theme: .monokai, lineNumbers: true))
+console.line()
+
+// JSON pretty printing
+console.rule("JSON Pretty Print")
+let jsonData: [String: Any] = [
+    "name": "RichSwift",
+    "version": "0.3.0",
+    "features": ["tables", "trees", "syntax", "progress"],
+    "awesome": true
+]
+console.printJSON(jsonData, sortKeys: true)
+console.line()
+
+// Markdown rendering
+console.rule("Markdown")
+let markdown = """
+# Hello World
+
+This is **bold** and this is *italic*.
+
+- Item one
+- Item two
+- Item three
+
+`inline code` and [links](https://github.com) work too!
+"""
+console.printMarkdown(markdown)
 console.line()
 
 // Progress bars
@@ -97,14 +126,6 @@ for color: Color in [.brightRed, .brightGreen, .brightYellow, .brightBlue, .brig
 console.print(brightText)
 console.line()
 
-// Columns layout
-console.rule("Columns Layout")
-let col1 = Panel("Column 1\nWith content", title: "Left")
-let col2 = Panel("Column 2\nMore content", title: "Middle")
-let col3 = Panel("Column 3\nEven more!", title: "Right")
-console.print(Columns([col1, col2, col3], padding: 2))
-console.line()
-
 // Terminal info
 console.rule("Terminal Info")
 let terminal = Terminal.shared
@@ -112,6 +133,7 @@ console.print("Size: [bold]\(terminal.width)[/]x[bold]\(terminal.height)[/]")
 console.print("TTY: [bold]\(terminal.isTerminal ? "Yes" : "No")[/]")
 console.print("Color support: [bold]\(terminal.supportsColor ? "Yes" : "No")[/]")
 console.print("True color: [bold]\(terminal.supportsTrueColor ? "Yes" : "No")[/]")
+console.print("Hyperlinks: [bold]\(terminal.supportsHyperlinks ? "Yes" : "No")[/]")
 console.line()
 
 console.rule()
