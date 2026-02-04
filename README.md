@@ -174,15 +174,21 @@ RichSwift is designed for:
 - [x] Emoji support with shortcodes
 - [x] JSON pretty printing
 - [x] Hyperlinks (OSC 8 terminals)
-- [ ] Diff display (side-by-side, unified)
-- [ ] YAML pretty printing
 
-### v1.0.0 - Production Ready
+### v0.6.0 - Production Ready ✅
+- [x] Theme system (semantic colors, predefined themes)
+- [x] Structured events for machine-readable output
+- [x] Environment detection (CI, containers, NO_COLOR)
+- [x] Output configuration (rich, plain, JSON modes)
+- [x] Output recording for testing
+- [x] 70+ spinner animations
+
+### v1.0.0 - Release Candidate
+- [ ] Comprehensive test suite
+- [ ] DocC documentation
+- [ ] Performance optimization
 - [ ] Windows Terminal support
-- [ ] Comprehensive DocC documentation
-- [ ] Performance optimization for large outputs
 - [ ] Published to Swift Package Index
-- [ ] Semantic versioning and changelog
 
 ### Future
 - [ ] Diff display (side-by-side, unified)
