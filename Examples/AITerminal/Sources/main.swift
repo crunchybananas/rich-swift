@@ -41,6 +41,17 @@ struct AITerminalDemo {
             
             // Array expansion with [*]
             "echo ${myarray[*]}",
+            
+            // GitHub CLI with heredoc - common AI agent failure!
+            """
+            gh issue comment 123 --body "$(cat <<EOF
+            ## Status Update
+            
+            Fixed the bug in `Parser.swift`.
+            See PR #456 for details.
+            EOF
+            )"
+            """,
         ]
         
         let table = Table()
@@ -55,6 +66,51 @@ struct AITerminalDemo {
         }
         
         console.print(table)
+        console.print("")
+        
+        // MARK: - Demo 1b: Heredoc Deep Dive (Common AI Agent Issue)
+        
+        console.rule("Heredoc Transformation (GitHub CLI Example)")
+        console.print("")
+        
+        console.print(Panel(
+            """
+            🤖 AI agents frequently generate bash heredocs that fail in zsh:
+            
+            • gh issue comment with multi-line body
+            • Complex escaping with backticks and variables  
+            • $(cat <<EOF ... EOF) pattern
+            
+            The shell adapter automatically converts these to portable strings.
+            """,
+            title: "Why Heredocs Fail",
+            borderStyle: Style(foreground: .yellow)
+        ))
+        console.print("")
+        
+        let heredocExample = """
+        gh issue comment 123 --body "$(cat <<EOF
+        ## Status Update
+        
+        Fixed the bug in `Parser.swift`.
+        See PR #456 for details.
+        EOF
+        )"
+        """
+        
+        console.print("[bold red]Original (Bash heredoc - fails in zsh):[/bold red]".asMarkup)
+        console.print(Syntax(heredocExample, language: .bash, lineNumbers: true))
+        console.print("")
+        
+        let heredocAdapted = adapter.adapt(heredocExample)
+        
+        console.print("[bold green]Adapted (Works in zsh):[/bold green]".asMarkup)
+        console.print(Syntax(heredocAdapted.adapted, language: .bash, lineNumbers: true))
+        console.print("")
+        
+        if !heredocAdapted.changes.isEmpty {
+            console.print("[dim]Transformation applied: \(heredocAdapted.changes.first?.description ?? "")[/dim]".asMarkup)
+        }
         console.print("")
         
         // MARK: - Demo 2: Command Safety Analysis

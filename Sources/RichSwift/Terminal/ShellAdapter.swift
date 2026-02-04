@@ -50,61 +50,68 @@ public struct ShellAdapter: Sendable {
         var result = command
         var changes: [CommandChange] = []
         
-        // 1. Fix $'...' ANSI-C quoting (zsh handles differently)
+        // 1. Fix heredoc syntax FIRST (common AI agent issue)
+        // Must run before other transformations that might alter heredoc content
+        if let (newCmd, change) = fixHeredoc(result) {
+            result = newCmd
+            changes.append(change)
+        }
+        
+        // 2. Fix $'...' ANSI-C quoting (zsh handles differently)
         if let (newCmd, change) = fixAnsiCQuoting(result) {
             result = newCmd
             changes.append(change)
         }
         
-        // 2. Fix array syntax: ${array[@]} works but ${array[*]} differs
+        // 3. Fix array syntax: ${array[@]} works but ${array[*]} differs
         if let (newCmd, change) = fixArrayExpansion(result) {
             result = newCmd
             changes.append(change)
         }
         
-        // 3. Fix echo -e (zsh echo handles escapes by default)
+        // 4. Fix echo -e (zsh echo handles escapes by default)
         if let (newCmd, change) = fixEchoEscape(result) {
             result = newCmd
             changes.append(change)
         }
         
-        // 4. Fix read command differences
+        // 5. Fix read command differences
         if let (newCmd, change) = fixReadCommand(result) {
             result = newCmd
             changes.append(change)
         }
         
-        // 5. Fix [[ ]] regex matching (=~ behaves differently)
+        // 6. Fix [[ ]] regex matching (=~ behaves differently)
         if let (newCmd, change) = fixRegexMatching(result) {
             result = newCmd
             changes.append(change)
         }
         
-        // 6. Fix source vs . (both work but precedence differs)
+        // 7. Fix source vs . (both work but precedence differs)
         if let (newCmd, change) = fixSourceCommand(result) {
             result = newCmd
             changes.append(change)
         }
         
-        // 7. Fix command substitution with special chars
+        // 8. Fix command substitution with special chars
         if let (newCmd, change) = fixCommandSubstitution(result) {
             result = newCmd
             changes.append(change)
         }
         
-        // 8. Fix here-string quoting
+        // 9. Fix here-string quoting
         if let (newCmd, change) = fixHereString(result) {
             result = newCmd
             changes.append(change)
         }
         
-        // 9. Fix brace expansion differences
+        // 10. Fix brace expansion differences
         if let (newCmd, change) = fixBraceExpansion(result) {
             result = newCmd
             changes.append(change)
         }
         
-        // 10. Fix function definition syntax
+        // 11. Fix function definition syntax
         if let (newCmd, change) = fixFunctionSyntax(result) {
             result = newCmd
             changes.append(change)
@@ -253,9 +260,17 @@ public struct ShellAdapter: Sendable {
         var inBacktick = false
         var start = result.startIndex
         var ranges: [(Range<String.Index>, String)] = []
+        var prevChar: Character = " "
         
         for i in result.indices {
-            if result[i] == "`" {
+            let char = result[i]
+            if char == "`" {
+                // Skip escaped backticks
+                if prevChar == "\\" {
+                    prevChar = char
+                    continue
+                }
+                
                 if inBacktick {
                     let content = String(result[result.index(after: start)..<i])
                     let endIndex = result.index(after: i)
@@ -265,6 +280,7 @@ public struct ShellAdapter: Sendable {
                 }
                 inBacktick.toggle()
             }
+            prevChar = char
         }
         
         // Apply replacements in reverse
@@ -287,6 +303,100 @@ public struct ShellAdapter: Sendable {
     private func fixHereString(_ cmd: String) -> (String, CommandChange)? {
         // <<< "string" works in both, but quoting behavior differs
         return nil
+    }
+    
+    private func fixHeredoc(_ cmd: String) -> (String, CommandChange)? {
+        // AI agents often generate bash heredocs that fail in zsh due to:
+        // 1. Variable expansion differences
+        // 2. Quote handling in the delimiter
+        // 3. Escape sequence interpretation
+        
+        // Common pattern: gh issue comment with heredoc
+        // Bash: gh issue comment 123 --body "$(cat <<EOF
+        // Multi-line
+        // content
+        // EOF
+        // )"
+        //
+        // This often fails in zsh. Convert to simpler form:
+        // gh issue comment 123 --body "Multi-line\ncontent"
+        
+        // Detect heredoc patterns
+        let heredocPatterns = [
+            // $(cat <<EOF ... EOF) pattern
+            #"\$\(cat\s*<<\s*(\w+)[\s\S]*?\1\s*\)"#,
+            // <<EOF ... EOF pattern (inline)
+            #"<<\s*(\w+)\s*[\s\S]*?\1"#,
+            // <<-EOF pattern (with tab stripping)
+            #"<<-\s*(\w+)[\s\S]*?\1"#,
+        ]
+        
+        for pattern in heredocPatterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators]) else { continue }
+            let range = NSRange(cmd.startIndex..., in: cmd)
+            
+            if let match = regex.firstMatch(in: cmd, range: range),
+               let matchRange = Range(match.range, in: cmd) {
+                
+                let heredocContent = String(cmd[matchRange])
+                
+                // Extract the content between delimiters
+                if let converted = convertHeredocToQuoted(heredocContent) {
+                    let result = cmd.replacingCharacters(in: matchRange, with: converted)
+                    
+                    return (result, CommandChange(
+                        type: .heredoc,
+                        description: "Converted heredoc to quoted string (zsh heredoc escaping differs)",
+                        original: String(heredocContent.prefix(50)) + (heredocContent.count > 50 ? "..." : ""),
+                        replacement: String(converted.prefix(50)) + (converted.count > 50 ? "..." : "")
+                    ))
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    /// Convert heredoc content to a properly escaped quoted string
+    private func convertHeredocToQuoted(_ heredoc: String) -> String? {
+        // Extract content from $(cat <<EOF ... EOF) pattern
+        let catPattern = #"\$\(cat\s*<<\s*(\w+)\n([\s\S]*?)\n\1\s*\)"#
+        if let regex = try? NSRegularExpression(pattern: catPattern, options: [.dotMatchesLineSeparators]),
+           let match = regex.firstMatch(in: heredoc, range: NSRange(heredoc.startIndex..., in: heredoc)),
+           let contentRange = Range(match.range(at: 2), in: heredoc) {
+            
+            let content = String(heredoc[contentRange])
+            return escapeForZshQuoting(content)
+        }
+        
+        // Extract from simple <<EOF ... EOF pattern
+        let simplePattern = #"<<-?\s*(\w+)\n([\s\S]*?)\n\1"#
+        if let regex = try? NSRegularExpression(pattern: simplePattern, options: [.dotMatchesLineSeparators]),
+           let match = regex.firstMatch(in: heredoc, range: NSRange(heredoc.startIndex..., in: heredoc)),
+           let contentRange = Range(match.range(at: 2), in: heredoc) {
+            
+            let content = String(heredoc[contentRange])
+            return escapeForZshQuoting(content)
+        }
+        
+        return nil
+    }
+    
+    /// Escape content for use in zsh double-quoted string
+    private func escapeForZshQuoting(_ content: String) -> String {
+        var escaped = content
+        // Escape backslashes first
+        escaped = escaped.replacingOccurrences(of: "\\", with: "\\\\")
+        // Escape double quotes
+        escaped = escaped.replacingOccurrences(of: "\"", with: "\\\"")
+        // Escape dollar signs (prevent variable expansion)
+        escaped = escaped.replacingOccurrences(of: "$", with: "\\$")
+        // Convert newlines to \n
+        escaped = escaped.replacingOccurrences(of: "\n", with: "\\n")
+        // Escape backticks
+        escaped = escaped.replacingOccurrences(of: "`", with: "\\`")
+        
+        return "\"\(escaped)\""
     }
     
     private func fixBraceExpansion(_ cmd: String) -> (String, CommandChange)? {
@@ -374,6 +484,7 @@ public struct CommandChange: Sendable {
         case commandSubstitution
         case parameterExpansion
         case globQualifier
+        case heredoc
         case quoting
         case other
     }

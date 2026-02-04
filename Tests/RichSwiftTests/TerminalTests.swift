@@ -59,6 +59,46 @@ struct ShellAdapterTests {
         #expect(!result.wasModified)
         #expect(result.changes.isEmpty)
     }
+    
+    @Test("Adapts heredoc to quoted string")
+    func adaptsHeredoc() {
+        let adapter = ShellAdapter(targetShell: .zsh)
+        let heredocCommand = """
+        gh issue comment 123 --body "$(cat <<EOF
+        Hello world
+        Line two
+        EOF
+        )"
+        """
+        
+        let result = adapter.adapt(heredocCommand)
+        
+        #expect(result.wasModified)
+        #expect(result.changes.contains { $0.type == .heredoc })
+        // Should contain escaped newlines, not actual newlines
+        #expect(result.adapted.contains("\\n"))
+        // Should not contain the heredoc delimiter anymore
+        #expect(!result.adapted.contains("<<EOF"))
+    }
+    
+    @Test("Preserves escaped backticks in heredoc content")
+    func preservesBackticksInHeredoc() {
+        let adapter = ShellAdapter(targetShell: .zsh)
+        let heredocCommand = """
+        gh issue comment 123 --body "$(cat <<EOF
+        Fixed bug in `file.swift`
+        EOF
+        )"
+        """
+        
+        let result = adapter.adapt(heredocCommand)
+        
+        #expect(result.wasModified)
+        // Backticks should be escaped, not converted to $()
+        #expect(result.adapted.contains("\\`file.swift\\`"))
+        // Should NOT have been converted to command substitution
+        #expect(!result.adapted.contains("$(file.swift)"))
+    }
 }
 
 // MARK: - Command Sanitizer Tests
