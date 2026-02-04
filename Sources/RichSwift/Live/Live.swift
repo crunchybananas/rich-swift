@@ -46,9 +46,9 @@ public actor Live {
     }
     
     /// Update with a simple string (with markup support)
-    public func update(_ message: String) async {
+    public func update(_ message: String) {
         let text = message.asMarkup
-        await update(text)
+        update(text)
     }
     
     /// Start the live display

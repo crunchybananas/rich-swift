@@ -366,7 +366,7 @@ struct SpinnersTests {
     func spinnerFrameAt() {
         let spinner = Spinners.dots
         let frame0 = spinner.frame(at: .zero)
-        let frame1 = spinner.frame(at: .milliseconds(80))
+        _ = spinner.frame(at: .milliseconds(80))  // Verify subsequent frame works
         
         // Frames should cycle
         #expect(frame0 == spinner.frames[0])

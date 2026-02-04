@@ -111,9 +111,11 @@ public actor Progress: Sendable {
                 text.append("\n")
             }
             
-            let description = await task.description
+            // Immutable properties can be accessed without await
+            let description = task.description
+            let total = task.total
+            // Mutable properties and computed properties need await
             let completed = await task.completed
-            let total = await task.total
             let percentage = await task.percentage
             let isFinished = await task.isFinished
             

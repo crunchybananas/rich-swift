@@ -413,7 +413,7 @@ public struct CommandSanitizer: Sendable {
     public func analyze(_ command: String) -> SanitizationResult {
         var warnings: [String] = []
         var riskLevel: RiskLevel = .safe
-        var blockedReason: String? = nil
+        let blockedReason: String? = nil
         
         let lowercased = command.lowercased()
         

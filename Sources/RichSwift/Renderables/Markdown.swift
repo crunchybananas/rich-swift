@@ -131,9 +131,6 @@ public struct Markdown: Renderable, Sendable {
             let content = String(line.dropFirst()).trimmingCharacters(in: .whitespaces)
             text.append("│ ", style: Style(foreground: .brightBlack))
             text.append(parseInline(content))
-            for span in text.spans {
-                // Apply blockquote style to all spans
-            }
             return text
         }
         
@@ -151,7 +148,7 @@ public struct Markdown: Renderable, Sendable {
         
         // Ordered lists
         let orderedListPattern = #"^(\s*)(\d+)\.\s+(.*)$"#
-        if let match = line.range(of: orderedListPattern, options: .regularExpression) {
+        if line.range(of: orderedListPattern, options: .regularExpression) != nil {
             let parts = line.split(separator: ".", maxSplits: 1)
             if parts.count == 2 {
                 let indent = line.prefix(while: { $0 == " " || $0 == "\t" })

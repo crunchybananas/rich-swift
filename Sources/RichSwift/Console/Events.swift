@@ -61,7 +61,8 @@ public struct Event: Sendable, Codable {
 }
 
 /// Type-erased Codable wrapper for Any values
-public struct AnyCodable: Sendable, Codable {
+/// Note: Uses @unchecked Sendable as we only store immutable JSON-like values
+public struct AnyCodable: @unchecked Sendable, Codable {
     public let value: Any
     
     public init(_ value: Any) {

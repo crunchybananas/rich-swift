@@ -1,7 +1,8 @@
 import Foundation
 
 /// Pretty-print JSON with syntax highlighting
-public struct JSON: Renderable, Sendable {
+/// Note: Uses @unchecked Sendable as data contains only JSON-compatible values
+public struct JSON: Renderable, @unchecked Sendable {
     public let data: Any
     public let indent: Int
     public let theme: Syntax.Theme
@@ -48,8 +49,6 @@ public struct JSON: Renderable, Sendable {
     }
     
     private func renderValue(_ value: Any, indent level: Int, into text: inout Text) {
-        let indentStr = String(repeating: " ", count: level * indent)
-        
         switch value {
         case let dict as [String: Any]:
             renderObject(dict, indent: level, into: &text)
