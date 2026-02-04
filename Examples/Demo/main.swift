@@ -14,9 +14,9 @@ console.line()
 
 // Panel
 console.print(Panel(
-    "RichSwift brings beautiful terminal output to Swift!\n\nFeatures:\n• Styled text\n• Tables\n• Panels\n• Progress bars",
+    "RichSwift brings beautiful terminal output to Swift!\n\nFeatures:\n• Styled text\n• Tables\n• Panels\n• Progress bars\n• Trees\n• Live updates",
     title: "Welcome",
-    subtitle: "v0.1.0"
+    subtitle: "v0.2.0"
 ))
 console.line()
 
@@ -52,6 +52,27 @@ for (name, boxStyle) in styles {
 }
 console.line()
 
+// Tree view
+console.rule("Tree View")
+let tree = Tree("📁 RichSwift", style: Style.bold)
+let src = tree.add("📁 Sources", style: Style(foreground: .yellow))
+let richswift = src.add("📁 RichSwift")
+richswift.add("📄 RichSwift.swift", style: Style(foreground: .green))
+let consoleDir = richswift.add("📁 Console")
+consoleDir.add("📄 Console.swift", style: Style(foreground: .green))
+consoleDir.add("📄 Terminal.swift", style: Style(foreground: .green))
+let renderables = richswift.add("📁 Renderables")
+renderables.add("📄 Table.swift", style: Style(foreground: .green))
+renderables.add("📄 Panel.swift", style: Style(foreground: .green))
+renderables.add("📄 Tree.swift", style: Style(foreground: .green))
+let tests = tree.add("📁 Tests", style: Style(foreground: .yellow))
+tests.add("📄 RichSwiftTests.swift", style: Style(foreground: .green))
+tree.add("📄 Package.swift", style: Style(foreground: .cyan))
+tree.add("📄 README.md", style: Style(foreground: .cyan))
+
+console.print(tree)
+console.line()
+
 // Progress bars
 console.rule("Progress Bars")
 for percent in stride(from: 0, through: 100, by: 25) {
@@ -76,6 +97,14 @@ for color: Color in [.brightRed, .brightGreen, .brightYellow, .brightBlue, .brig
 console.print(brightText)
 console.line()
 
+// Columns layout
+console.rule("Columns Layout")
+let col1 = Panel("Column 1\nWith content", title: "Left")
+let col2 = Panel("Column 2\nMore content", title: "Middle")
+let col3 = Panel("Column 3\nEven more!", title: "Right")
+console.print(Columns([col1, col2, col3], padding: 2))
+console.line()
+
 // Terminal info
 console.rule("Terminal Info")
 let terminal = Terminal.shared
@@ -86,4 +115,4 @@ console.print("True color: [bold]\(terminal.supportsTrueColor ? "Yes" : "No")[/]
 console.line()
 
 console.rule()
-console.print("[dim]Demo complete![/]")
+console.print("[dim]Static demo complete! Run LiveDemo for animated features.[/]")

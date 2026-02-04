@@ -38,9 +38,24 @@ table.addRow("1977", "A New Hope")
 table.addRow("1980", "The Empire Strikes Back")
 console.print(table)
 
-// Progress bars
-for await _ in console.progress(total: 100) {
-    // do work
+// Tree views
+let tree = Tree("📁 Project")
+tree.add("📄 README.md")
+tree.add("📁 Sources").add("📄 main.swift")
+console.print(tree)
+
+// Progress with async/await
+try await console.status("Loading...") {
+    try await Task.sleep(for: .seconds(2))
+}
+
+// Multi-task progress tracking
+try await console.progress { progress in
+    let task = await progress.addTask(description: "Downloading", total: 100)
+    for _ in 0..<100 {
+        await task.advance()
+        try await Task.sleep(for: .milliseconds(50))
+    }
 }
 ```
 
@@ -52,7 +67,7 @@ for await _ in console.progress(total: 100) {
 
 ## Roadmap
 
-### v0.1.0 - Foundation (Current)
+### v0.1.0 - Foundation ✅
 - [x] Core styling system (colors, attributes)
 - [x] Rich-style markup parser `[bold red]text[/]`
 - [x] Text rendering with ANSI escape codes
@@ -62,19 +77,19 @@ for await _ in console.progress(total: 100) {
 - [x] Terminal detection (size, color support)
 - [x] Cross-platform structure (SPM)
 
-### v0.2.0 - Live Output
-- [ ] Live display context (update in place)
-- [ ] Animated progress bars with async/await
-- [ ] Spinner animations
-- [ ] Status indicators
-- [ ] Multi-progress (multiple concurrent bars)
+### v0.2.0 - Live Output ✅
+- [x] Live display context (update in place)
+- [x] Animated progress bars with async/await
+- [x] Spinner animations
+- [x] Status indicators
+- [x] Multi-progress (multiple concurrent bars)
 
-### v0.3.0 - Rich Content
+### v0.3.0 - Rich Content (Current)
+- [x] Tree view (file trees, hierarchies)
+- [x] Columns/grid layout
+- [x] Padding and alignment utilities
 - [ ] Syntax highlighting for code blocks
 - [ ] Markdown rendering
-- [ ] Tree view (file trees, hierarchies)
-- [ ] Columns/grid layout
-- [ ] Padding and alignment utilities
 
 ### v0.4.0 - Developer Experience
 - [ ] Swift-log integration (`LogHandler`)
@@ -97,30 +112,21 @@ for await _ in console.progress(total: 100) {
 - [ ] 100% API documentation coverage
 - [ ] Published to Swift Package Index
 
+## Running the Demos
+
+```bash
+# Static demo (tables, panels, trees, etc.)
+swift run Demo
+
+# Live/animated demo (spinners, progress bars)
+swift run LiveDemo
+```
+
 ## Next Steps
 
 If you're picking this up, here's the suggested order of development:
 
-### 1. Live Display (High Impact)
-The killer feature of Rich is live updating. Start with:
-
-```swift
-// Goal API:
-let live = console.live()
-live.update(progressBar)  // Updates in place
-live.stop()
-
-// Or with async/await:
-for await progress in console.track(items) {
-    // Automatically shows/updates progress
-}
-```
-
-Key files to create:
-- `Sources/RichSwift/Live/LiveDisplay.swift`
-- `Sources/RichSwift/Live/RefreshThread.swift`
-
-### 2. Syntax Highlighting
+### 1. Syntax Highlighting
 Would make this invaluable for CLI dev tools:
 
 ```swift
@@ -129,7 +135,7 @@ console.print(Code(source, language: .swift))
 
 Consider using tree-sitter bindings or a simple regex-based highlighter.
 
-### 3. Swift-Log Integration
+### 2. Swift-Log Integration
 Easy win for adoption:
 
 ```swift
@@ -139,7 +145,7 @@ LoggingSystem.bootstrap { label in
 }
 ```
 
-### 4. Input/Prompts
+### 3. Input/Prompts
 Interactive CLI apps need this:
 
 ```swift

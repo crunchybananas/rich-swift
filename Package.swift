@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "RichSwift",
     platforms: [
-        .macOS(.v12),
+        .macOS(.v13),
     ],
     products: [
         .library(name: "RichSwift", targets: ["RichSwift"]),
@@ -23,6 +23,11 @@ let package = Package(
             name: "Demo",
             dependencies: ["RichSwift"],
             path: "Examples/Demo"
+        ),
+        .executableTarget(
+            name: "LiveDemo",
+            dependencies: ["RichSwift"],
+            path: "Examples/LiveDemo"
         ),
     ]
 )
