@@ -1,22 +1,39 @@
 # RichSwift
 
-A Swift port of Python's [Rich](https://github.com/Textualize/rich) library for beautiful terminal output.
+A powerful, Swift-native terminal UI framework for building beautiful command-line applications. Originally inspired by Python's [Rich](https://github.com/Textualize/rich), RichSwift has evolved into a production-ready library designed for real-world Swift CLI tools, automation scripts, and headless applications.
+
+## Why RichSwift?
+
+- **Swift-First Design** - Built with Swift's type system, async/await, and actors
+- **Production Ready** - Designed for use in real applications, not just demos
+- **Composable** - Mix and match components to build complex interfaces
+- **Modern Concurrency** - Full async/await support for live updates and progress tracking
+- **Extensible** - Protocol-based architecture makes it easy to add custom renderables
 
 ## Features
 
-- 🎨 **Styled text** - Bold, italic, underline, colors, and more
+### Display & Formatting
+- 🎨 **Styled text** - Bold, italic, underline, strikethrough, colors (16, 256, TrueColor)
 - 📊 **Tables** - Beautiful ASCII/Unicode tables with multiple box styles
-- 📈 **Progress bars** - Static and animated with async/await
 - 🌳 **Tree views** - File trees, hierarchies with custom styles
-- 🖼️ **Panels** - Bordered content boxes with titles
-- 💻 **Syntax highlighting** - Code blocks with themes (Monokai, GitHub, Dracula)
+- 🖼️ **Panels** - Bordered content boxes with titles and subtitles
+- 💻 **Syntax highlighting** - 15+ languages with themes (Monokai, GitHub, Dracula)
 - 📝 **Markdown** - Render markdown to styled terminal output
-- 🎯 **Live updates** - Spinners, status indicators, multi-progress tracking
-- 📋 **Prompts** - Interactive input, confirmation, select menus
+- 📊 **JSON** - Pretty printed with syntax highlighting
 - 🔗 **Hyperlinks** - Clickable links in supported terminals (OSC 8)
 - 😀 **Emoji** - Shortcode support (`:rocket:` → 🚀)
-- 📊 **JSON** - Pretty printed with syntax highlighting
-- 📜 **Logging** - Swift-log integration with colored output
+
+### Live & Interactive
+- 📈 **Progress bars** - Static and animated with async/await
+- 🎯 **Live updates** - 70+ spinner animations, status indicators
+- ⏳ **Multi-progress** - Track multiple concurrent tasks with ETA
+- 📋 **Prompts** - Interactive input, passwords, confirmation dialogs
+- 🎛️ **Select menus** - Arrow key navigation, single and multi-select
+
+### Integration
+- 📜 **Swift-log** - Drop-in `LogHandler` with colored, formatted output
+- 🔧 **Headless mode** - Run without TTY for CI/CD and automation
+- 🖥️ **Terminal detection** - Auto-detect capabilities (color, size, hyperlinks)
 
 ## Installation
 
@@ -106,9 +123,19 @@ logger.error("Something went wrong!")
 
 ## Platforms
 
-- ✅ macOS
-- ✅ Linux
+- ✅ macOS 13+
+- ✅ Linux (Ubuntu, Debian, Fedora)
 - 🚧 Windows (planned)
+
+## Use Cases
+
+RichSwift is designed for:
+
+- **CLI Tools** - Build polished command-line applications with rich output
+- **Automation Scripts** - Pretty progress tracking and status updates
+- **Headless Services** - Structured logging and diagnostics for server apps
+- **Developer Tools** - Syntax highlighting, tree views for code analysis
+- **AI/ML Pipelines** - Track training progress, display model outputs
 
 ## Roadmap
 
@@ -152,10 +179,17 @@ logger.error("Something went wrong!")
 
 ### v1.0.0 - Production Ready
 - [ ] Windows Terminal support
-- [ ] Comprehensive documentation
-- [ ] Performance optimization
-- [ ] 100% API documentation coverage
+- [ ] Comprehensive DocC documentation
+- [ ] Performance optimization for large outputs
 - [ ] Published to Swift Package Index
+- [ ] Semantic versioning and changelog
+
+### Future
+- [ ] Diff display (side-by-side, unified)
+- [ ] YAML pretty printing
+- [ ] Layout engine for complex UIs
+- [ ] Plugin system for custom themes
+- [ ] Accessibility improvements (screen reader hints)
 
 ## Running the Demos
 
@@ -228,18 +262,22 @@ Color.red, .green, .blue, .rgb(255, 128, 0), .hex("#ff8000")
 
 ## Contributing
 
-This is a learning project! Areas where help is welcome:
+Contributions are welcome! Areas where help is especially appreciated:
 
-1. **Windows support** - Need testing on Windows Terminal
-2. **Performance** - Profiling large table rendering
-3. **Accessibility** - Screen reader compatibility
-4. **Documentation** - DocC documentation site
+1. **Windows support** - Testing on Windows Terminal and ConPTY
+2. **Performance** - Profiling and optimizing large table/tree rendering
+3. **Accessibility** - Screen reader compatibility and semantic output
+4. **Documentation** - DocC documentation and examples
+5. **Testing** - Unit tests and snapshot tests for renderables
 
-## Inspiration
+## Acknowledgments
 
-- [Rich (Python)](https://github.com/Textualize/rich) - The original
-- [Chalk (Node.js)](https://github.com/chalk/chalk) - Terminal styling
-- [Swift Argument Parser](https://github.com/apple/swift-argument-parser) - CLI patterns
+RichSwift was inspired by these excellent projects:
+
+- [Rich (Python)](https://github.com/Textualize/rich) - The original inspiration
+- [Chalk (Node.js)](https://github.com/chalk/chalk) - Terminal styling patterns
+- [Swift Argument Parser](https://github.com/apple/swift-argument-parser) - Swift CLI best practices
+- [Textual (Python)](https://github.com/Textualize/textual) - TUI application framework
 
 ## License
 
