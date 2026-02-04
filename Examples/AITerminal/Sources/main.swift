@@ -140,7 +140,6 @@ struct AITerminalDemo {
             let result = try await terminal.run("echo 'test' && ls -la Package.swift 2>/dev/null || echo 'not found'")
             
             console.print("[dim]Command result as JSON (for AI parsing):[/dim]".asMarkup)
-            let json = JSON([:]) // We'll print the raw JSON instead
             console.print("")
             
             // Pretty print the JSON output
