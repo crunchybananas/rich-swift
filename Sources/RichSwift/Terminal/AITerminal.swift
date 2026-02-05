@@ -92,7 +92,7 @@ public actor AITerminal {
     
     /// Execute a command with adaptation and sanitization
     public func run(_ command: String) async throws -> CommandResult {
-        let startTime = CFAbsoluteTimeGetCurrent()
+        let startDate = Date()
         
         // Sanitize if enabled
         var warnings: [String] = []
@@ -121,7 +121,7 @@ public actor AITerminal {
         // Execute
         let (stdout, stderr, exitCode) = try await execute(adaptedCommand)
         
-        let duration = CFAbsoluteTimeGetCurrent() - startTime
+        let duration = Date().timeIntervalSince(startDate)
         
         let result = CommandResult(
             command: command,

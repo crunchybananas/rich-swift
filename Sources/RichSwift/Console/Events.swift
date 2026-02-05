@@ -252,6 +252,7 @@ public extension Console {
 }
 
 /// Private storage for console config
+#if canImport(ObjectiveC)
 private var consoleConfigKey: UInt8 = 0
 
 public extension Console {
@@ -271,3 +272,34 @@ public extension Console {
         self.config = config
     }
 }
+#else
+/// On Linux, use a global dictionary for associated storage (no ObjC runtime)
+private let configLock = NSLock()
+private var configStorage: [ObjectIdentifier: ConsoleConfig] = [:]
+
+public extension Console {
+    /// Configuration for this console
+    var config: ConsoleConfig? {
+        get {
+            configLock.lock()
+            defer { configLock.unlock() }
+            return configStorage[ObjectIdentifier(self)]
+        }
+        set {
+            configLock.lock()
+            defer { configLock.unlock() }
+            if let newValue = newValue {
+                configStorage[ObjectIdentifier(self)] = newValue
+            } else {
+                configStorage.removeValue(forKey: ObjectIdentifier(self))
+            }
+        }
+    }
+    
+    /// Create a console with specific configuration
+    convenience init(config: ConsoleConfig) {
+        self.init()
+        self.config = config
+    }
+}
+#endif

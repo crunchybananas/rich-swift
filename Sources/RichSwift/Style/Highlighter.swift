@@ -1,5 +1,16 @@
 import Foundation
 
+/// Cross-platform conversion of NSRange to Range<String.Index>.
+/// On Linux with Swift 6.2+, Range(NSRange, in:) is not available in FoundationEssentials.
+private func rangeFromNSRange(_ nsRange: NSRange, in string: some StringProtocol) -> Range<String.Index>? {
+    guard nsRange.location != NSNotFound else { return nil }
+    let utf16 = string.utf16
+    guard nsRange.location + nsRange.length <= utf16.count else { return nil }
+    let start = utf16.index(utf16.startIndex, offsetBy: nsRange.location)
+    let end = utf16.index(start, offsetBy: nsRange.length)
+    return start..<end
+}
+
 /// Protocol for text highlighters
 public protocol Highlighter {
     /// Highlight the given text
@@ -69,7 +80,7 @@ public struct ReprHighlighter: Highlighter {
         for pattern in patterns {
             if let regex = try? NSRegularExpression(pattern: pattern),
                let match = regex.firstMatch(in: String(text), range: NSRange(text.startIndex..., in: text)) {
-                let matchRange = Range(match.range, in: text)!
+                let matchRange = rangeFromNSRange(match.range, in: text)!
                 return Match(text: String(text[matchRange]), range: matchRange)
             }
         }
@@ -86,7 +97,7 @@ public struct ReprHighlighter: Highlighter {
         for pattern in patterns {
             if let regex = try? NSRegularExpression(pattern: pattern),
                let match = regex.firstMatch(in: String(text), range: NSRange(text.startIndex..., in: text)) {
-                let matchRange = Range(match.range, in: text)!
+                let matchRange = rangeFromNSRange(match.range, in: text)!
                 return Match(text: String(text[matchRange]), range: matchRange)
             }
         }
@@ -97,7 +108,7 @@ public struct ReprHighlighter: Highlighter {
         let pattern = #"^(true|false|True|False|TRUE|FALSE)\b"#
         if let regex = try? NSRegularExpression(pattern: pattern),
            let match = regex.firstMatch(in: String(text), range: NSRange(text.startIndex..., in: text)) {
-            let matchRange = Range(match.range, in: text)!
+            let matchRange = rangeFromNSRange(match.range, in: text)!
             return Match(text: String(text[matchRange]), range: matchRange)
         }
         return nil
@@ -107,7 +118,7 @@ public struct ReprHighlighter: Highlighter {
         let pattern = #"^(nil|null|None|NULL)\b"#
         if let regex = try? NSRegularExpression(pattern: pattern),
            let match = regex.firstMatch(in: String(text), range: NSRange(text.startIndex..., in: text)) {
-            let matchRange = Range(match.range, in: text)!
+            let matchRange = rangeFromNSRange(match.range, in: text)!
             return Match(text: String(text[matchRange]), range: matchRange)
         }
         return nil
@@ -117,7 +128,7 @@ public struct ReprHighlighter: Highlighter {
         let pattern = #"^https?://[^\s<>\"']+"#
         if let regex = try? NSRegularExpression(pattern: pattern),
            let match = regex.firstMatch(in: String(text), range: NSRange(text.startIndex..., in: text)) {
-            let matchRange = Range(match.range, in: text)!
+            let matchRange = rangeFromNSRange(match.range, in: text)!
             return Match(text: String(text[matchRange]), range: matchRange)
         }
         return nil
@@ -127,7 +138,7 @@ public struct ReprHighlighter: Highlighter {
         let pattern = #"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"#
         if let regex = try? NSRegularExpression(pattern: pattern),
            let match = regex.firstMatch(in: String(text), range: NSRange(text.startIndex..., in: text)) {
-            let matchRange = Range(match.range, in: text)!
+            let matchRange = rangeFromNSRange(match.range, in: text)!
             return Match(text: String(text[matchRange]), range: matchRange)
         }
         return nil
@@ -148,7 +159,7 @@ public struct ISOHighlighter: Highlighter {
         while !remaining.isEmpty {
             if let regex = try? NSRegularExpression(pattern: pattern),
                let match = regex.firstMatch(in: String(remaining), range: NSRange(remaining.startIndex..., in: remaining)),
-               let matchRange = Range(match.range, in: remaining) {
+               let matchRange = rangeFromNSRange(match.range, in: remaining) {
                 
                 result.append(String(remaining[..<matchRange.lowerBound]))
                 result.append(String(remaining[matchRange]), style: Style(foreground: .magenta))
@@ -181,7 +192,7 @@ public struct RegexHighlighter: Highlighter {
             for (pattern, style) in rules {
                 if let regex = try? NSRegularExpression(pattern: "^" + pattern),
                    let match = regex.firstMatch(in: String(remaining), range: NSRange(remaining.startIndex..., in: remaining)),
-                   let matchRange = Range(match.range, in: remaining) {
+                   let matchRange = rangeFromNSRange(match.range, in: remaining) {
                     
                     if matchRange.lowerBound == remaining.startIndex {
                         result.append(String(remaining[matchRange]), style: style)

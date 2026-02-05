@@ -61,12 +61,22 @@ public struct JSON: Renderable, @unchecked Sendable {
             
         case let number as NSNumber:
             // Check if it's a boolean
+            #if canImport(ObjectiveC)
             if CFGetTypeID(number) == CFBooleanGetTypeID() {
                 let boolValue = number.boolValue
                 text.append(boolValue ? "true" : "false", style: theme.keyword)
             } else {
                 text.append("\(number)", style: theme.number)
             }
+            #else
+            // On Linux, NSNumber for booleans has objCType "c"
+            if String(cString: number.objCType) == "c" {
+                let boolValue = number.boolValue
+                text.append(boolValue ? "true" : "false", style: theme.keyword)
+            } else {
+                text.append("\(number)", style: theme.number)
+            }
+            #endif
             
         case let int as Int:
             text.append("\(int)", style: theme.number)

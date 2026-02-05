@@ -41,7 +41,7 @@ extension Console {
         var oldTermios = termios()
         tcgetattr(STDIN_FILENO, &oldTermios)
         var newTermios = oldTermios
-        newTermios.c_lflag &= ~UInt(ECHO)
+        newTermios.c_lflag &= ~tcflag_t(ECHO)
         tcsetattr(STDIN_FILENO, TCSANOW, &newTermios)
         
         defer {
@@ -163,7 +163,7 @@ extension Console {
         var oldTermios = termios()
         tcgetattr(STDIN_FILENO, &oldTermios)
         var newTermios = oldTermios
-        newTermios.c_lflag &= ~UInt(ICANON | ECHO)
+        newTermios.c_lflag &= ~tcflag_t(ICANON | ECHO)
         newTermios.c_cc.0 = 1  // VMIN
         newTermios.c_cc.1 = 0  // VTIME
         tcsetattr(STDIN_FILENO, TCSANOW, &newTermios)
@@ -313,7 +313,7 @@ extension Console {
         var oldTermios = termios()
         tcgetattr(STDIN_FILENO, &oldTermios)
         var newTermios = oldTermios
-        newTermios.c_lflag &= ~UInt(ICANON | ECHO)
+        newTermios.c_lflag &= ~tcflag_t(ICANON | ECHO)
         newTermios.c_cc.0 = 1
         newTermios.c_cc.1 = 0
         tcsetattr(STDIN_FILENO, TCSANOW, &newTermios)

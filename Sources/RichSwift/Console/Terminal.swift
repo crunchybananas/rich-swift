@@ -84,7 +84,7 @@ public struct Terminal: Sendable {
         return 80
         #else
         var size = winsize()
-        if ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) == 0 {
+        if ioctl(STDOUT_FILENO, UInt(TIOCGWINSZ), &size) == 0 {
             return Int(size.ws_col)
         }
         
@@ -108,7 +108,7 @@ public struct Terminal: Sendable {
         return 24
         #else
         var size = winsize()
-        if ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) == 0 {
+        if ioctl(STDOUT_FILENO, UInt(TIOCGWINSZ), &size) == 0 {
             return Int(size.ws_row)
         }
         
